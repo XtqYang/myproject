@@ -1,10 +1,8 @@
 import time
-import subprocess
 import json
-from urllib.parse import urlencode
-
-import requests
+import subprocess
 from scrapy import signals
+from urllib.parse import urlencode
 from myproject.spiders.m_h5_tk import H5TkExtractor  # 保持原有 m_h5_tk.py 不变
 
 
@@ -150,7 +148,7 @@ class TaobaoMiddleware:
             url=full_url,
             # 交给 parse 方法处理
             callback=spider.parse,
-            meta={**request.meta, 'proxy': 'http://127.0.0.1:8080', 'sign_generated': True},
+            meta={**request.meta, 'proxy': 'http://127.0.0.1:7890', 'sign_generated': True},
             cookies=cookies,
             headers=headers,
         )

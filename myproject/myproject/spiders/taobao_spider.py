@@ -31,6 +31,7 @@ class TaobaoSpider(scrapy.Spider):
             )
 
     def parse(self, response, **kwargs):
+        print("响应")
         print(response.text)
         match = re.search(r'mtopjsonp\w*\((\{.*\})\)', response.text)
         if not match:
