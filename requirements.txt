@@ -1,0 +1,13 @@
+apscheduler==3.11.0
+click==8.0.1
+Flask==2.1.1
+gunicorn==19.9.0
+itemadapter==0.8.0
+lxml==4.9.2
+Pillow==11.1.0
+redis==3.5.3
+Requests==2.32.3
+Scrapy==2.12.0
+selenium==3.141.0
+sphinx_rtd_theme==3.0.2
+Werkzeug==2.1.0

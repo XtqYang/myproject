@@ -6,29 +6,28 @@ from urllib.parse import urlencode
 from myproject.spiders.m_h5_tk import H5TkExtractor  # 保持原有 m_h5_tk.py 不变
 
 
-class MyprojectSpiderMiddleware:
+import random
+from scrapy import signals
+
+class RandomUserAgentMiddleware:
+    def __init__(self, user_agent_list):
+        self.user_agent_list = user_agent_list
+
     @classmethod
     def from_crawler(cls, crawler):
-        s = cls()
-        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
-        return s
-
-    def process_spider_input(self, response, spider):
-        return None
-
-    def process_spider_output(self, response, result, spider):
-        for i in result:
-            yield i
-
-    def process_spider_exception(self, response, exception, spider):
-        pass
-
-    def process_start_requests(self, start_requests, spider):
-        for r in start_requests:
-            yield r
+        settings = crawler.settings
+        user_agent_list = settings.get('USER_AGENT_LIST', [])
+        middleware = cls(user_agent_list)
+        crawler.signals.connect(middleware.spider_opened, signals.spider_opened)
+        return middleware
 
     def spider_opened(self, spider):
-        spider.logger.info("Spider opened: %s" % spider.name)
+        spider.logger.info("RandomUserAgentMiddleware 已启用")
+
+    def process_request(self, request, spider):
+        # 随机选择一个 UA
+        ua = random.choice(self.user_agent_list)
+        request.headers.setdefault('User-Agent', ua)
 
 
 class TaobaoMiddleware:
@@ -138,18 +137,19 @@ class TaobaoMiddleware:
             'sec-fetch-dest': 'script',
             'sec-fetch-mode': 'no-cors',
             'sec-fetch-site': 'same-site',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
         }
         # 构造新请求并标记已处理
         new_request = request.replace(
             url=full_url,
             # 交给 parse 方法处理
             callback=spider.parse,
-            meta={**request.meta, 'proxy': 'http://127.0.0.1:7890', 'sign_generated': True},
+            meta={**request.meta, 'proxy': 'http://127.0.0.1:8080', 'sign_generated': True},
             cookies=cookies,
             headers=headers,
         )
         spider.logger.debug(f"Proxy in meta: {new_request.meta.get('proxy')}")
+
+
 
         return new_request
 
