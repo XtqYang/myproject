@@ -42,7 +42,6 @@ class TaobaoMiddleware:
         return cls(node_path=settings.get('NODE_SCRIPT_PATH', 'sign_em.js'))
 
     def process_request(self, request, spider):
-        print("请求")
         # 检查是否已经处理过该请求
         if 'sign_generated' in request.meta:
             return None  # 已处理过的请求直接放行
@@ -141,8 +140,6 @@ class TaobaoMiddleware:
             'sec-fetch-site': 'same-site',
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
         }
-        # 更新请求
-        print(f"full_url:{full_url},request.meta:{request.meta},cookies:{cookies},headers:{headers}")
         # 构造新请求并标记已处理
         new_request = request.replace(
             url=full_url,

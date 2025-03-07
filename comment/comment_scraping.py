@@ -83,7 +83,6 @@ class TaobaoRateScraper:
         }
 
         args = self.run_js_script_with_args(self.token, self.pageNo, self.auctionNumId, self.eE, eT).strip()
-        print(args)
         self.loads = json.loads(args)
 
     def run_js_script_with_args(self, *args):
@@ -110,7 +109,6 @@ class TaobaoRateScraper:
             'callback': 'mtopjsonppcdetail25',
             'data': f'{{"showTrueCount":false,"auctionNumId":"{self.auctionNumId}","pageNo":{int(self.pageNo)},"pageSize":20,"rateType":"","searchImpr":"-8","orderType":"","expression":"","rateSrc":"pc_rate_list"}}',
         }
-        print(str(self.loads["eM"]))
         response = requests.get(
             'https://h5api.m.taobao.com/h5/mtop.taobao.rate.detaillist.get/6.0/',
             params=params,
@@ -133,7 +131,6 @@ def fetch_taobao_rate_data(auction_num_id, page_no):
     h_tk_extractor = H5TkExtractor()
     get_h__tk = h_tk_extractor.get_h5_tk(auction_num_id)
     token = get_h__tk[0].split('_')[0]  # 取 `_` 前面的部分
-    print(get_h__tk)
     e_e = str(int(time.time() * 1000))  # 当前时间戳
     e_t = "12574478"  # 固定值
     # 创建 TaobaoRateScraper 实例
@@ -151,10 +148,10 @@ def fetch_taobao_rate_data(auction_num_id, page_no):
 
 # 使用示例
 if __name__ == "__main__":
-    auction_num_id = "680107621134"
+    auction_num_id = "769361086770"
     page_no = "2"
     try:
-        for i in range(10):
+        for i in range(3):
             result = fetch_taobao_rate_data(auction_num_id, str(i + 1))
             print(result)
     except Exception as e:
