@@ -20,7 +20,8 @@ USER_AGENT_LIST = [
     "1Mozilla/5.0 (Linux; Android 14; SM-S928U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36"
 
 ]
-
+PROXY_API = 'http://192.168.43.128:5010/get/'  # 你的代理池地址
+PROXY_HEALTH_CHECK_URL = "https://httpbin.org/ip"  # 代理健康检查地址
 ROBOTSTXT_OBEY = False
 LOG_LEVEL = 'INFO'
 # 配置 Scrapy 执行的最大并发请求数（默认值：16）
@@ -30,6 +31,8 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 16
 CONCURRENT_REQUESTS_PER_IP = 16
 AUTOTHROTTLE_ENABLED = True  # 启用自动限速
 COOKIES_ENABLED = True  # 启用自动Cookie处理
+PROXY_POOL_SIZE = 5  # 显式设置代理池容量
+
 # TELNETCONSOLE_ENABLED = False
 # DEFAULT_REQUEST_HEADERS = {
 #    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -39,13 +42,19 @@ COOKIES_ENABLED = True  # 启用自动Cookie处理
 #    "myproject.middlewares.MyprojectSpiderMiddleware": 543,
 # }
 DOWNLOADER_MIDDLEWARES = {
-    'myproject.middlewares.RandomUserAgentMiddleware': 542,  # 优先级高于默认 UA 中间件
-    'myproject.middlewares.TaobaoMiddleware': 543,  # 543 是优先级，数字越小优先级越高
-    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,  # 禁用默认
-    # 禁用默认的 ProxyMiddleware
-    'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 400,
+    # 禁用默认 UA 中间件（必须）
+    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+    # 禁用默认代理中间件（必须）
+    'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': None,
+
+    # 自定义 UA 中间件应优先于代理中间件（数字更小优先级更高）
+    'myproject.middlewares.RandomUserAgentMiddleware': 542,
+    # 淘宝定制中间件（根据需求调整顺序）
+    'myproject.middlewares.TaobaoMiddleware': 543,
+    # 代理池中间件（必须高于 HttpProxyMiddleware 的默认优先级 750）
+    'myproject.middlewares.ProxyPoolMiddleware': 544,
 }
-PROXY = "http://127.0.0.1:8080"
+# PROXY = "http://127.0.0.1:8080"
 RETRY_ENABLED = False
 DOWNLOAD_TIMEOUT = 30
 # EXTENSIONS = {
@@ -59,6 +68,7 @@ ES_HOSTS = ['http://192.168.43.128:9200']  # ES 服务器地址
 ES_INDEX = 'taobao_comments'  # 索引名称
 ES_USER = 'elastic'
 ES_PASSWORD = '0M*0wVJk0+9Rr7lZpjg6'
+
 # AUTOTHROTTLE_START_DELAY = 5
 # AUTOTHROTTLE_MAX_DELAY = 60
 # each remote server

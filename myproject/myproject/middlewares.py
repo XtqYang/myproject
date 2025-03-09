@@ -1,13 +1,145 @@
-import time
 import json
+import time
+import random
+import logging
+import requests
+import threading
 import subprocess
 from scrapy import signals
+from collections import deque
 from urllib.parse import urlencode
+from scrapy.exceptions import NotConfigured
 from myproject.spiders.m_h5_tk import H5TkExtractor  # 保持原有 m_h5_tk.py 不变
+from twisted.internet.error import TimeoutError, TCPTimedOutError
 
 
-import random
-from scrapy import signals
+class ProxyPoolMiddleware:
+    """Scrapy 代理池中间件，实现自动代理管理和失效重试机制"""
+
+    def __init__(self, PROXY_API, pool_size=5, health_check_url='https://httpbin.org/ip'):
+        self.PROXY_API = PROXY_API
+        self.pool_size = pool_size
+        self.health_check_url = health_check_url
+        self.proxy_pool = deque()  # 改用双端队列提高效率
+        self.failed_proxies = set()
+        self.logger = logging.getLogger(__name__)
+        self.lock = threading.Lock()  # 线程锁
+        # 初始化时预填充代理池
+        self._refresh_proxy_pool()
+    @classmethod
+    def from_crawler(cls, crawler):
+        """从Scrapy配置初始化中间件"""
+        PROXY_API = crawler.settings.get('PROXY_API')
+        if not PROXY_API:
+            raise NotConfigured('PROXY_API 未在配置中设置')
+
+        return cls(
+            PROXY_API=PROXY_API,
+            pool_size=crawler.settings.getint('PROXY_POOL_SIZE', 10),
+            health_check_url=crawler.settings.get('PROXY_HEALTH_CHECK_URL', 'https://httpbin.org/ip')
+        )
+
+    def _fetch_new_proxy(self):
+        """从代理池服务获取新代理（修改为直接返回文本）"""
+        try:
+            response = requests.get(self.PROXY_API, timeout=5)
+            if response.status_code == 200:
+                return response.text.strip()  # 假设API直接返回ip:port
+            self.logger.warning(f"代理API返回状态码: {response.status_code}")
+        except Exception as e:
+            self.logger.warning(f"获取代理失败: {str(e)}")
+        return None
+
+    def _health_check(self, proxy):
+        """验证代理可用性（优化超时时间）"""
+        try:
+            resp = requests.get(
+                self.health_check_url,
+                proxies={'http': proxy, 'https': proxy},
+                timeout=5  # 缩短超时时间
+            )
+            if resp.json().get('origin'):
+                return True
+        except Exception as e:
+            self.logger.debug(f"代理检测失败(验证代理可用性): {proxy} - {str(e)}")
+        return False
+
+    def _refresh_proxy_pool(self):
+        """线程安全的代理池刷新机制"""
+        with self.lock:
+            while len(self.proxy_pool) < self.pool_size:
+                proxy = self._fetch_new_proxy()
+                if not proxy:
+                    continue
+
+                # 格式标准化
+                if "://" not in proxy:
+                    proxy = f"http://{proxy}"
+
+                # 跳过失效代理
+                if proxy in self.failed_proxies:
+                    continue
+
+                # 执行健康检查
+                if self._health_check(proxy):
+                    self.proxy_pool.append(proxy)
+                    self.logger.info(f"成功添加代理: {proxy}")
+                else:
+                    self.failed_proxies.add(proxy)
+                    self.logger.warning(f"代理检测失败(线程安全的代理池刷新机制): {proxy}")
+
+    def process_request(self, request, spider):
+        print(1111)
+        """处理请求代理设置（添加线程安全）"""
+        if 'proxy' in request.meta:
+            return
+
+        # 检查并维护代理池容量
+        with self.lock:
+            if len(self.proxy_pool) < self.pool_size // 2:
+                self._refresh_proxy_pool()
+
+        if not self.proxy_pool:
+            spider.logger.error("代理池为空，无法设置代理")
+            return
+
+        # 获取并设置代理
+        with self.lock:
+            proxy = self.proxy_pool.popleft()
+
+        request.meta['proxy'] = proxy
+        spider.logger.debug(f"当前使用代理: {proxy}")
+
+        # 异步补充代理池
+        self._refresh_proxy_pool()
+
+    def process_response(self, request, response, spider):
+        """处理响应（优化状态码判断逻辑）"""
+        if response.status in [403, 429, 407, 500, 502, 503]:
+            bad_proxy = request.meta.get('proxy')
+            if bad_proxy:
+                with self.lock:
+                    self.failed_proxies.add(bad_proxy)
+                spider.logger.warning(f"标记失效代理: {bad_proxy} 状态码: {response.status}")
+                # 立即刷新代理池
+                self._refresh_proxy_pool()
+                return request.replace(dont_filter=True)
+        return response
+
+    def process_exception(self, request, exception, spider):
+        """处理异常（添加线程安全）"""
+        if 'proxy' in request.meta:
+            bad_proxy = request.meta['proxy']
+            with self.lock:
+                self.failed_proxies.add(bad_proxy)
+                if bad_proxy in self.proxy_pool:
+                    self.proxy_pool.remove(bad_proxy)
+
+            spider.logger.error(f"移除失效代理: {bad_proxy} 原因: {exception}")
+            # 立即补充新代理
+            self._refresh_proxy_pool()
+            return request.replace(dont_filter=True)
+
 
 class RandomUserAgentMiddleware:
     def __init__(self, user_agent_list):
@@ -143,13 +275,12 @@ class TaobaoMiddleware:
             url=full_url,
             # 交给 parse 方法处理
             callback=spider.parse,
-            meta={**request.meta, 'proxy': 'http://127.0.0.1:8080', 'sign_generated': True},
+            # meta={**request.meta, 'proxy': 'http://127.0.0.1:8080', 'sign_generated': True},
+            meta={**request.meta, 'sign_generated': True},
             cookies=cookies,
             headers=headers,
         )
         spider.logger.debug(f"Proxy in meta: {new_request.meta.get('proxy')}")
-
-
 
         return new_request
 
