@@ -19,12 +19,13 @@ headers = {
     'sec-ch-ua-platform': '"Windows"',
 }
 
-# html_content = requests.get('https://proxylister.com/', headers=headers)
-with open("1.html", "r", encoding="utf-8") as file:
-    html_content = file.read()
-print(html_content)
-pattern = r'<td class="table-ip"><strong>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})</strong></td>\s*<td>(\d+)</td>'
+html_content = requests.get('https://www.89ip.cn/index_2.html', headers=headers)
+print(html_content.text)
+# with open("1.html", "r", encoding="utf-8") as file:
+#     html_content = file.read()
+# print(html_content)
+pattern = r'<tr>\s*<td>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s*</td>\s*<td>\s*(\d+)\s*</td>'
 # 正则表达式提取 IP 和端口号
-proxies = re.findall(pattern, html_content)
+proxies = re.findall(pattern, html_content.text)
 print(proxies)
 #

@@ -59,17 +59,19 @@ class ProxyFetcher(object):
                 yield ":".join(proxy)
 
     @staticmethod
-    def freeProxy3():
+    def freeProxy03():
         """ 89免费代理 """
-        r = WebRequest().get("https://www.89ip.cn/index_1.html", timeout=10)
-        proxies = re.findall(
-            r'<td.*?>[\s\S]*?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})[\s\S]*?</td>[\s\S]*?<td.*?>[\s\S]*?(\d+)[\s\S]*?</td>',
-            r.text)
-        for proxy in proxies:
-            yield ':'.join(proxy)
+        urls = ['https://www.89ip.cn/index_2.html', "https://www.89ip.cn/index_3.html",
+                "https://www.89ip.cn/index_4.html", "https://www.89ip.cn/index_5.html"]
+        for url in urls:
+            r = WebRequest().get(url, timeout=10)
+            pattern = r'<tr>\s*<td>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s*</td>\s*<td>\s*(\d+)\s*</td>'
+            proxies = re.findall(pattern, r.text)
+            for proxy in proxies:
+                yield ':'.join(proxy)
 
     @staticmethod
-    def freeProxy4():
+    def freeProxy04():
         """ free免费代理 """
         urls = ['https://freeproxyupdate.com/']
         request = WebRequest()
@@ -77,11 +79,10 @@ class ProxyFetcher(object):
             r = request.get(url, timeout=10)
             proxies = re.findall(r'<td>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})</td>[\s\S]*?<td>(\d+)</td>', r.text)
             for proxy in proxies:
-                print(proxy)
                 yield ':'.join(proxy)
 
     @staticmethod
-    def freeProxy5():
+    def freeProxy05():
         """ best-proxy免费代理 """
         urls = ['https://best-proxy.com/english/index.php?p=1', 'https://best-proxy.com/english/index.php?p=2',
                 'https://best-proxy.com/english/index.php?p=3']
@@ -96,7 +97,7 @@ class ProxyFetcher(object):
                 yield proxy
 
     @staticmethod
-    def freeProxy6():
+    def freeProxy06():
         """ ProxyLister免费代理 """
         r = WebRequest().get("https://proxylister.com/", timeout=10)
         pattern = r'<td class="table-ip"><strong>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})</strong></td>\s*<td>(\d+)</td>'
