@@ -1,3 +1,4 @@
+# --Unicode=utf-8--
 import json
 import re
 import time
@@ -136,7 +137,6 @@ def fetch_taobao_rate_data(auction_num_id, page_no):
     # 创建 TaobaoRateScraper 实例
     scraper = TaobaoRateScraper(script_path, get_h__tk[0], get_h__tk[1], token, page_no, auction_num_id, e_e, e_t)
     data_str = scraper.get_rate_data()
-
     # 解析 JSON 数据
     match = re.search(r'mtopjsonp\w*\((\{.*\})\)', data_str)
     if match:
@@ -150,9 +150,8 @@ def fetch_taobao_rate_data(auction_num_id, page_no):
 if __name__ == "__main__":
     auction_num_id = "769361086770"
     page_no = "2"
-    try:
-        for i in range(3):
-            result = fetch_taobao_rate_data(auction_num_id, str(i + 1))
-            print(result)
-    except Exception as e:
-        print(f"发生错误: {e}")
+    for i in range(50):
+        print(f"正在获取第{i}条数据")
+        result = fetch_taobao_rate_data(auction_num_id, str(i + 1))
+        print((result)["ret"])
+        print((result))
