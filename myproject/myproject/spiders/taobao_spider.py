@@ -22,7 +22,7 @@ class TaobaoSpider(scrapy.Spider):
             yield Request(
                 url=base_url,
                 method='GET',
-                meta={'auction_num_id': self.auction_num_id, 'page_no': page},
+                meta={'auction_num_id': self.auction_num_id, 'page_no': page, 'proxy': 'http://127.0.0.1:8080'},
                 callback=self.parse,
                 dont_filter=True
             )

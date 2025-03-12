@@ -388,43 +388,35 @@ class TaobaoMiddleware:
 
         # 设置必要的cookies
         cookies = {
-            'cna': 'FxR3H2WkqwUCAbRbsI99XbR5',
-            'thw': 'cn',
-            '_cc_': 'U%2BGCWk%2F7og%3D%3D',
-            'tfstk': 'gHAt0vm5gDmGcDUUgoMhn8lCPK0nEILZdh87iijghHKpxFFMInx0MtspPVSi3A-vpntFIGOcsIFAvhNcI1sgknLVvO0woArYMMtViGji7iavAEtA3VScciKDld0nZbYw7s5XD0coZchGZ6KTfR6jlM_5502qaSGy7s5jxyVjEbLwV96aNd_fR2QcoPwXcOsQOaIC5i66cM6CPaq1GstjJ6_PuPa1CsZIOM7fGitfGAm3Wi41DSpq_4jpi0l7MSddWOIviMFAEBVldgNOx7F-oNBTpFsLGSOpK_K1nGMz-i5GbF790bPN1tpXs6OsAj1WUHdAF_Hm7_OwlLJX8l3Afexww1O-X5bhHGpB19UbGUT1v9pvXceNfdxdUw6Qkb7HqMTw1p34AFtlX1_CKbgJRt9H_TRiA5CWUFfMh3i3IG9RlgoMZQQmxujRoRgKJ-yVCw895Tw9aPcCnwIo-J2439bFJg0KJ-yVCw7dq2233-Wh8',
-            't': '67b05d17a37c35cb6ae723fb2bb2e6ea',
-            '_tb_token_': 'f3e657fa10eee',
             '_samesite_flag_': 'true',
-            'cookie2': '1f8db2010899859f7ae746c37c3e4ab9',
-            '3PcFlag': '1740833156528',
-            'sgcookie': 'E100%2Bg17ZWEoFlVN3NYjICxI4oT6QCYNQhw%2Fa%2BGrmP02Q4TU8UIjF1tuWjG%2B8fYcP%2FNnJpEN3G9WgKQnLApDFhXi6DrnsSLdtpRAu5saC8qwTno%3D',
-            'wk_cookie2': '16d3a798cbf114b38ff160f1765ef328',
+            'cookie2': '17af0ee9c37ba35e43e3ca54a8cebd2f',
+            't': '20c1b8c96e003a04455d570c7d82bc72',
+            '_tb_token_': '58e33aa81eba5',
+            'thw': 'cn',
+            '_hvn_lgc_': '0',
+            'cookie3_bak': '17af0ee9c37ba35e43e3ca54a8cebd2f',
+            'wk_cookie2': '151177e5c67f84d11997af48b49e9de2',
             'wk_unb': 'UUpgT7v9r1VNs0K1OQ%3D%3D',
-            'unb': '2219453037520',
-            'uc3': 'id2=UUpgT7v9r1VNs0K1OQ%3D%3D&nk2=F5RAQIcpOqF0wFxodeQ%3D&lg2=UIHiLt3xD8xYTw%3D%3D&vt3=F8dD2E8Zf9qKwtLe3ys%3D',
-            'csg': '4a08dd84',
             'lgc': 'tb528238846663',
             'cancelledSubSites': 'empty',
-            'cookie17': 'UUpgT7v9r1VNs0K1OQ%3D%3D',
+            'env_bak': 'FM%2Bgm%2FLsLU9A4rJ1FgHP60VCPlEfNzKsIK%2B1NLhtfUD5',
             'dnk': 'tb528238846663',
-            'skt': '47b49b3557d1e99e',
-            'existShop': 'MTc0MDgzMzIyMQ%3D%3D',
-            'uc4': 'id4=0%40U2gqwARzFIUfVaMSaLM2EjsU9dS%2FyoQm&nk4=0%40FY4L7HgyQ01YvoqPicBCi%2BYt%2FY2hriW54Q%3D%3D',
             'tracknick': 'tb528238846663',
-            '_l_g_': 'Ug%3D%3D',
-            'sg': '308',
-            '_nk_': 'tb528238846663',
-            'cookie1': 'BdTujoy%2Fv745d0Ov9DgOHFMLNMtwU4xV7thGHePIEH4%3D',
-            'ariaDefaultTheme': 'default',
-            'ariaFixed': 'true',
-            'ariaReadtype': '1',
-            'ariaoldFixedStatus': 'false',
-            'ariaScale': '1',
-            'ariaMousemode': 'true',
-            'ariaStatus': 'false',
-            'uc1': 'cookie16=VFC%2FuZ9az08KUQ56dCrZDlbNdA%3D%3D&cookie21=UIHiLt3xSalX&pas=0&cookie15=WqG3DMC9VAQiUQ%3D%3D&cookie14=UoYai9dzGEgTFw%3D%3D&existShop=false',
-            'isg': 'BLm5VEhe-m0zDKX3XT3MYs1dyCWTxq146PRyatvuNeBfYtn0Ixa9SCex5OaUQUWw',
+            'sgcookie': 'E100EukvQfosjPXXEQdYSGhLUS9oUZf4Uzz%2FhykDpSfFfRJDzmSS8gSSSL4xDCezKLksA2YLV6HroKqr2HrA%2BaoLzIC0dlK752fN31BmZeevMKo%3D',
+            'havana_lgc2_0': 'eyJoaWQiOjIyMTk0NTMwMzc1MjAsInNnIjoiODcxNTZhYzE2NTk3ZjU3MGNjZjZlZDNlMTUyYmU4YmMiLCJzaXRlIjowLCJ0b2tlbiI6IjFNOWVNSzhUSGhkVXhPWndtQkZlRlh3In0',
+            'havana_lgc_exp': '1772730920811',
+            'cookie3_bak_exp': '1741886120812',
+            'uc3': 'lg2=VT5L2FSpMGV7TQ%3D%3D&vt3=F8dD2EjKML%2BJUk1PXv0%3D&nk2=F5RAQIcpOqF0wFxodeQ%3D&id2=UUpgT7v9r1VNs0K1OQ%3D%3D',
+            'csg': '16ac354f',
+            'skt': '30456cdcabcd41ba',
+            'existShop': 'MTc0MTYyNjkyMA%3D%3D',
+            'uc4': 'id4=0%40U2gqwARzFIUfVaMSaLM2EjsVMwls%2FYrV&nk4=0%40FY4L7HgyQ01YvoqPicBCi%2BYt%2FDWmQ7bHpQ%3D%3D',
+            '_cc_': 'UIHiLt3xSw%3D%3D',
+            'x5sec': '7b2274223a313734313734353934322c22733b32223a2261653836646632373139343538653138222c22617365727665723b33223a22307c43492f6577373447454f664a784b6342476738794d6a45354e44557a4d444d334e5449774f7a4569436d4e6863484e736157526c646a49772b6265457867493d227d',
             'mtop_partitioned_detect': '1',
+            'sdkSilent': '1741832345046',
+            'havana_sdkSilent': '1741832345046',
+            '3PcFlag': '1741746140697',
             '_m_h5_tk': h5_tk_data[0],
             '_m_h5_tk_enc': h5_tk_data[1],
         }
@@ -460,7 +452,8 @@ class TaobaoMiddleware:
         return new_request
 
     def process_response(self, request, response, spider):
-        print(f"响应：{response}")
+        self.logger.info(f"响应体预览: {response.text[:200]}")
+
         """
         处理响应数据
 

@@ -146,17 +146,17 @@ eP = function(eu) {
                         eU = em(eU, eL);
                     return (eI(eR) + eI(eD) + eI(eB) + eI(eU)).toLowerCase()
                 }
-const token = process.argv[2]; // 第一个参数
-const pageNo = Number(process.argv[3]); // 第二个参数
-const auctionNumId = process.argv[4];
-const eE = Number(process.argv[5]);
-const eT = process.argv[6];
+// const token = process.argv[2]; // 第一个参数
+// const pageNo = Number(process.argv[3]); // 第二个参数
+// const auctionNumId = process.argv[4];
+// const eE = Number(process.argv[5]);
+// const eT = process.argv[6];
 
-// const token = "6f9b724a7adc62c2b8ae0eadc6d16313"
-// const pageNo = 1
-// const auctionNumId = "653962244590"
-// const eE = 1741183114206
-// const eT ="12574478"
+const token = "828ecc200313ebd1afc79991df7a1f0f"
+const pageNo = 1
+const auctionNumId = "769361086770"
+const eE = 1741747744019
+const eT ="12574478"
 
 data = `{"showTrueCount":false,"auctionNumId":"${auctionNumId}","pageNo":${pageNo},"pageSize":20,"rateType":"","searchImpr":"-8","orderType":"","expression":"","rateSrc":"pc_rate_list"}`
 eM = eP(token + "&" + eE + "&" + eT + "&" + data)

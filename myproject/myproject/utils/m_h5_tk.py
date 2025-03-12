@@ -81,7 +81,9 @@ class H5TkExtractor:
         }
 
         response = requests.get(
-            'https://h5api.m.taobao.com/h5/mtop.taobao.mercury.checkcollect/1.0/',
+            # 'https://h5api.m.taobao.com/h5/mtop.taobao.mercury.checkcollect/1.0/',
+            'https://h5api.m.taobao.com/h5/mtop.relationrecommend.wirelessrecommend.recommend/2.0/',
+
             params=params,
             cookies=self.cookies,
             headers=self.headers,
