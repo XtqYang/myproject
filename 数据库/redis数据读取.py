@@ -2,7 +2,7 @@ import redis
 
 
 class RedisManager:
-    def __init__(self, db_conn='redis://:@192.168.43.128:6379/0'):
+    def __init__(self, db_conn='redis://:@8.138.154.238:6379/0'):
         """初始化 Redis 连接"""
         self.redis_client = redis.from_url(db_conn)
 

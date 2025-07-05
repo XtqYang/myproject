@@ -10,6 +10,7 @@ from collections import deque
 from urllib.parse import urlencode
 from scrapy.exceptions import NotConfigured, IgnoreRequest
 from myproject.utils.m_h5_tk import H5TkExtractor  # 保持原有 m_h5_tk.py 不变
+from myproject.utils.sign import generate_signature
 from twisted.internet.error import TimeoutError, TCPTimedOutError
 
 
@@ -255,6 +256,7 @@ class TaobaoMiddleware:
         self.max_retries = max_retries
         self.logger = logging.getLogger(__name__)
         self.auction_num_id = "769361086770"
+        self.sign = 'd37e5e17062c5012dddfbdbb09f6af2d'
         self.proxy_middleware = None  # 用于引用ProxyPoolMiddleware实例
 
     @classmethod
@@ -274,90 +276,13 @@ class TaobaoMiddleware:
         return cls(node_path=node_path, max_retries=max_retries)
 
 
-
-    def _generate_sign(self, token, page_no, auction_num_id, timestamp, app_key, retry=0):
-        """
-        调用Node.js脚本生成淘宝API签名
-
-        Args:
-            token: H5 Token值
-            page_no: 评论页码
-            auction_num_id: 商品ID
-            timestamp: 时间戳
-            app_key: 应用Key
-            retry: 当前重试次数
-
-        Returns:
-            dict: 包含签名的字典，失败返回None
-        """
-        if retry >= self.max_retries:
-            self.logger.error("生成签名超过最大重试次数")
-            return None
-
-        # 运行 Node.js 生成签名
-        cmd = ['node', self.node_path, token, str(page_no), auction_num_id, timestamp, app_key]
-        try:
-            result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8')
-
-            if result.returncode != 0:
-                self.logger.error(f"Node.js 脚本执行失败: {result.stderr}")
-                time.sleep(0.5)  # 失败后短暂延迟
-                return self._generate_sign(token, page_no, auction_num_id, timestamp, app_key, retry + 1)
-
-            try:
-                sign_data = json.loads(result.stdout)
-                return sign_data
-            except json.JSONDecodeError:
-                self.logger.error(f"签名数据解析失败: {result.stdout}")
-                time.sleep(0.5)
-                return self._generate_sign(token, page_no, auction_num_id, timestamp, app_key, retry + 1)
-
-        except subprocess.SubprocessError as e:
-            self.logger.error(f"Node.js 进程调用异常: {str(e)}")
-            time.sleep(1)  # 失败后延迟更长时间
-            return self._generate_sign(token, page_no, auction_num_id, timestamp, app_key, retry + 1)
-
-        except Exception as e:
-            self.logger.error(f"生成签名过程中出现未知异常: {str(e)}")
-            return None
-
     def process_request(self, request, spider):
-        """
-        处理淘宝API请求，添加必要的签名和参数
 
-        Args:
-            request: Scrapy请求对象
-            spider: 爬虫实例
-
-        Returns:
-            Request: 修改后的请求对象
-            None: 请求处理完成，继续后续中间件处理
-        """
         # 检查是否已经处理过该请求
         if 'sign_generated' in request.meta:
             return None  # 已处理过的请求直接放行
-
-        # 获取请求参数
-        auction_num_id = "769361086770"
-        page_no = request.meta.get('page_no', 1)
-
-        # 获取 H5 Token
-        h5_tk_data = self.h5_tk_extractor.get_h5_tk(auction_num_id)
-        print(f"H5_Token:{h5_tk_data}")
-
-        if not h5_tk_data or h5_tk_data[0] is None or h5_tk_data[1] is None:
-            self.logger.error("获取 H5 Token 失败")
-            # 如果H5 Token获取失败，建议延迟后重试
-            time.sleep(2)
-            raise IgnoreRequest("H5 Token获取失败，请求被忽略")
-
-        # 解析token
-        token = h5_tk_data[0].split('_')[0]
-        app_key = "12574478"  # 固定的app_key
-        timestamp = str(int(time.time() * 1000))
-
-        # 生成签名
-        sign_data = self._generate_sign(token, page_no, auction_num_id, timestamp, app_key)
+        page_no = 2
+        sign_data = generate_signature(self.auction_num_id, self.sign, page_no)
         print(f"sign_data:{sign_data}")
         if not sign_data or 'eM' not in sign_data:
             self.logger.error("签名生成失败")
@@ -368,7 +293,7 @@ class TaobaoMiddleware:
         params = {
             'jsv': '2.7.4',
             'appKey': '12574478',
-            't': str(timestamp),
+            't': str(sign_data.get('time', '')),
             'sign': str(sign_data.get('eM', '')),
             'api': 'mtop.taobao.rate.detaillist.get',
             'v': '6.0',
@@ -379,12 +304,14 @@ class TaobaoMiddleware:
             'dataType': 'jsonp',
             'jsonpIncPrefix': 'pcdetail',
             'callback': 'mtopjsonppcdetail25',
-            'data': f'{{"showTrueCount":false,"auctionNumId":"{auction_num_id}","pageNo":{int(page_no)},"pageSize":20,"rateType":"","searchImpr":"-8","orderType":"","expression":"","rateSrc":"pc_rate_list"}}',
+            'data': f'{{"showTrueCount":false,"auctionNumId":"{self.auction_num_id}","pageNo":{int(page_no)},"pageSize":20,"rateType":"","searchImpr":"-8","orderType":"","expression":"","rateSrc":"pc_rate_list"}}',
         }
 
         # 构造完整URL
         base_url = 'https://h5api.m.taobao.com/h5/mtop.taobao.rate.detaillist.get/6.0/'
         full_url = base_url + '?' + urlencode(params)
+        extractor = H5TkExtractor()
+        get_h__tk = extractor.get_h5_tk()
 
         # 设置必要的cookies
         cookies = {
@@ -417,8 +344,8 @@ class TaobaoMiddleware:
             'sdkSilent': '1741832345046',
             'havana_sdkSilent': '1741832345046',
             '3PcFlag': '1741746140697',
-            '_m_h5_tk': h5_tk_data[0],
-            '_m_h5_tk_enc': h5_tk_data[1],
+            '_m_h5_tk': get_h__tk[0],
+            '_m_h5_tk_enc': get_h__tk[1],
         }
 
         # 设置请求头
@@ -453,7 +380,6 @@ class TaobaoMiddleware:
 
     def process_response(self, request, response, spider):
         self.logger.info(f"响应体预览: {response.text[:200]}")
-
         """
         处理响应数据
 

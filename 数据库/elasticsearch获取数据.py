@@ -89,8 +89,8 @@ class ElasticsearchClient:
 def main():
     # 配置参数
     es_config = {
-        "hosts": ["https://192.168.43.128:9200"],
-        "basic_auth": ("elastic", "0M*0wVJk0+9Rr7lZpjg6"),
+        "hosts": ["https://8.138.154.238:9200"],
+        "basic_auth": ("elastic", "wtZspEjN4RjGV8zjZp5v"),
         "index": "taobao_comments",
         "verify_certs": False,
         "ssl_show_warn": False

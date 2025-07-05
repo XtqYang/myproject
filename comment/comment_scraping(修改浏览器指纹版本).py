@@ -2,10 +2,56 @@
 import json
 import re
 import time
-import requests
 import subprocess
 from m_h5_tk import H5TkExtractor
-# from m_h5_tk2 import H5TkExtractor
+import requests_go
+
+tls = requests_go.tls_config.TLSConfig()
+tls.ja3 = "771,4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,16-18-5-27-0-13-11-43-45-35-51-23-10-65281-17513-21,29-23-24,0"
+tls.pseudo_header_order = [
+    ":method",
+    ":authority",
+    ":scheme",
+    ":path",
+]
+tls.tls_extensions.cert_compression_algo = ["brotli"]
+tls.tls_extensions.supported_signature_algorithms = [
+    "ecdsa_secp256r1_sha256",
+    "rsa_pss_rsae_sha256",
+    "rsa_pkcs1_sha256",
+    "ecdsa_secp384r1_sha384",
+    "rsa_pss_rsae_sha384",
+    "rsa_pkcs1_sha384",
+    "rsa_pss_rsae_sha512",
+    "rsa_pkcs1_sha512"
+]
+tls.tls_extensions.supported_versions = [
+    "GREASE",
+    "1.3",
+    "1.2"
+]
+tls.tls_extensions.psk_key_exchange_modes = [
+    "PskModeDHE"
+]
+tls.tls_extensions.key_share_curves = [
+    "GREASE",
+    "X25519"
+]
+tls.http2_settings.settings = {
+    "HEADER_TABLE_SIZE": 65536,
+    "ENABLE_PUSH": 0,
+    "MAX_CONCURRENT_STREAMS": 1000,
+    "INITIAL_WINDOW_SIZE": 6291456,
+    "MAX_HEADER_LIST_SIZE": 262144
+}
+tls.http2_settings.settings_order = [
+    "HEADER_TABLE_SIZE",
+    "ENABLE_PUSH",
+    "MAX_CONCURRENT_STREAMS",
+    "INITIAL_WINDOW_SIZE",
+    "MAX_HEADER_LIST_SIZE"
+]
+tls.http2_settings.connection_flow = 15663105
 
 
 class TaobaoRateScraper:
@@ -78,7 +124,7 @@ class TaobaoRateScraper:
 
     def get_rate_data(self):
         params = {
-            'jsv': '2.7.4',
+            'jsv': '2.7.0',
             'appKey': '12574478',
             't': str(self.eE),
             'sign': str(self.loads["eM"]),
@@ -93,11 +139,13 @@ class TaobaoRateScraper:
             'callback': 'mtopjsonppcdetail25',
             'data': f'{{"showTrueCount":false,"auctionNumId":"{self.auctionNumId}","pageNo":{int(self.pageNo)},"pageSize":20,"rateType":"","searchImpr":"-8","orderType":"","expression":"","rateSrc":"pc_rate_list"}}',
         }
-        response = requests.get(
+        response = requests_go.get(
             'https://h5api.m.taobao.com/h5/mtop.taobao.rate.detaillist.get/6.0/',
             params=params,
             cookies=self.cookies,
             headers=self.headers,
+            tls_config=tls,
+            verify=False
         )
         return response.text
 
@@ -114,6 +162,7 @@ def fetch_taobao_rate_data(auction_num_id, page_no):
     # 获取 H5 Token
     h_tk_extractor = H5TkExtractor()
     get_h__tk = h_tk_extractor.get_h5_tk(auction_num_id)
+    print(get_h__tk)
     token = get_h__tk[0].split('_')[0]  # 取 `_` 前面的部分
     e_e = str(int(time.time() * 1000))  # 当前时间戳
     e_t = "12574478"  # 固定值
@@ -124,6 +173,7 @@ def fetch_taobao_rate_data(auction_num_id, page_no):
     match = re.search(r'mtopjsonp\w*\((\{.*\})\)', data_str)
     if match:
         json_data = json.loads(match.group(1))
+
         return json_data
     else:
         raise ValueError("未找到有效的 JSON 数据")
